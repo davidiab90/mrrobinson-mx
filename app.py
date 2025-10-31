@@ -50,7 +50,10 @@ def ai_interior_modeling():
 def ai_solutions():
     return render_template('ai_solutions.html')
 
-
+import os
+if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
