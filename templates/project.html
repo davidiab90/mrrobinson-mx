@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Project - Dreamars</title>
+    <style>
+        body { font-family: Arial; text-align: center; background-color: #1C2526; color: #D9E4E6; }
+        nav { margin: 10px; border-bottom: 2px solid #D9E4E6; display: flex; align-items: center; }
+        .logo { height: 50px; margin-right: 10px; }
+        .nav-links { margin-left: auto; }
+        a { color: #FFFFFF; margin: 0 10px; text-decoration: none; padding: 5px; }
+        a:hover { color: #6B1212; background-color: #D9E4E6; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Dreamars Logo" class="logo">
+        <div class="nav-links">
+            <a href="/">Home</a> | <a href="/project">Project</a> | <a href="/contact">Contact</a>
+        </div>
+    </nav>
+    <h1>Project</h1>
+    <p>Explore our portfolio of renders and designs.</p>
+    <div><img src="{{ url_for('static', filename='Tirreno_31_04.jpg') }}" alt="Render Tirreno" style="max-width: 500px; border: 2px solid #D9E4E6;"><br><strong>TITULO 1</strong><br><em>Descripcion 1</em></div>
+</body>
+</html>>

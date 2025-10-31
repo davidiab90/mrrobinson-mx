@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Retícula con Selección</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        td {
+            width: 20px;
+            height: 20px;
+            border: 1px solid black;
+            cursor: pointer;
+            text-align: center;
+            vertical-align: middle;
+        }
+        td.selected {
+            background-color: #ffeb3b;
+        }
+        td.merged {
+            background-color: #4caf50;
+        }
+        form {
+            text-align: center;
+            margin: 20px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 5px;
+        }
+        #instructions {
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <form id="gridForm">
+        <label for="rows">Número de filas:</label>
+        <input type="number" id="rows" name="rows" min="1" value="35" required>
+        <br>
+        <label for="cols">Número de columnas:</label>
+        <input type="number" id="cols" name="cols" min="1" value="32" required>
+        <br>
+        <button type="button" onclick="generateGrid()">Generar Retícula</button>
+        <button type="button" onclick="playGame()">Jugar</button>
+        <button type="button" onclick="saveGame()">Guardar partida</button>
+        <button type="button" onclick="loadGame()">Cargar partida</button>
+    </form>
+    <div id="gridContainer"></div>
+    <div id="instructions">
+        <h3>Instrucciones:</h3>
+        <ul>
+            <li>Presiona U para activar/desactivar modo selección: arrastra el mouse para seleccionar casillas (incluyendo diagonales, seleccionando donde pasa el cursor).</li>
+            <li>Presiona B seguido de Enter para borrar la selección actual (confirmar con Enter).</li>
+            <li>Presiona Enter en modo selección para unir las casillas seleccionadas (deben formar un rectángulo contiguo, incluyendo uniones previas).</li>
+            <li>Presiona P para activar/desactivar modo sustraer: haz clic en una casilla unida para desunirla o borrar texto.</li>
+            <li>Presiona T para activar/desactivar modo texto: haz clic en una casilla para agregar o editar texto.</li>
+            <li>Botón Jugar: resuelve el crypto puzzle y rellena la fila 18 con el resultado final.</li>
+            <li>Botón Guardar partida: guarda el estado actual para evitar volver a seleccionar todo.</li>
+            <li>Botón Cargar partida: carga el estado guardado.</li>
+        </ul>
+    </div>
+
+    <script>
+        let selectMode = false;
+        let unmergeMode = false;
+        let textMode = false;
+        let clearPending = false;
+        let isDragging = false;
+        let selectedCells = new Set();
+        let merges = [];
+        let table;
+
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toUpperCase();
+            if (key === 'U') {
+                selectMode = !selectMode;
+                unmergeMode = false;
+                textMode = false;
+                clearPending = false;
+                alert(selectMode ? 'Modo selección activado.' : 'Modo selección desactivado.');
+            } else if (key === 'P') {
+                unmergeMode = !unmergeMode;
+                selectMode = false;
+                textMode = false;
+                clearPending = false;
+                alert(unmergeMode ? 'Modo sustraer activado.' : 'Modo sustraer desactivado.');
+            } else if (key === 'T') {
+                textMode = !textMode;
+                selectMode = false;
+                unmergeMode = false;
+                clearPending = false;
+                alert(textMode ? 'Modo texto activado.' : 'Modo texto desactivado.');
+            } else if (key === 'B') {
+                clearPending = true;
+                alert('Presiona Enter para confirmar borrar selección.');
+            }
+            if (event.key === 'Enter') {
+                if (selectMode) {
+                    if (clearPending) {
+                        selectedCells.clear();
+                        document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+                        clearPending = false;
+                        alert('Selección borrada.');
+                    } else {
+                        mergeSelectedCells();
+                    }
+                }
+                event.preventDefault();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        function generateGrid() {
+            const rows = parseInt(document.getElementById('rows').value);
+            const cols = parseInt(document.getElementById('cols').value);
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+            selectedCells.clear();
+            merges = [];
+            clearPending = false;
+            selectMode = false;
+            unmergeMode = false;
+            textMode = false;
+            isDragging = false;
+
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) {
+                alert('Por favor, ingresa números válidos mayores a 0.');
+                return;
+            }
+
+            table = document.createElement('table');
+            for (let i = 0; i < rows; i++) {
+                const tr = document.createElement('tr');
+                for (let j = 0; j < cols; j++) {
+                    const td = document.createElement('td');
+                    td.dataset.row = i;
+                    td.dataset.col = j;
+                    td.addEventListener('mousedown', handleMouseDown);
+                    td.addEventListener('mouseover', handleMouseOver);
+                    td.addEventListener('click', handleClick);
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+            container.appendChild(table);
+        }
+
+        function handleMouseDown(e) {
+            if (selectMode) {
+                e.preventDefault();
+                isDragging = true;
+                addCellToSelection(this);
+            }
+        }
+
+        function handleMouseOver() {
+            if (selectMode && isDragging) {
+                addCellToSelection(this);
+            }
+        }
+
+        function handleClick() {
+            if (unmergeMode) {
+                if (this.rowSpan > 1 || this.colSpan > 1 || this.innerHTML) {
+                    unmergeCell(this);
+                }
+            } else if (textMode) {
+                const text = prompt('Ingrese texto para la casilla:', this.innerHTML || '');
+                if (text !== null) {
+                    this.innerHTML = text;
+                    const row = parseInt(this.dataset.row);
+                    const col = parseInt(this.dataset.col);
+                    const found = merges.find(m => m.row === row && m.col === col);
+                    if (found) {
+                        found.text = text;
+                    } else {
+                        merges.push({ row, col, rowspan: this.rowSpan || 1, colspan: this.colSpan || 1, text });
+                    }
+                }
+            }
+        }
+
+        function addCellToSelection(cell) {
+            if (cell.style.display === 'none') return;
+            const cellId = `${cell.dataset.row}-${cell.dataset.col}`;
+            if (!selectedCells.has(cellId)) {
+                selectedCells.add(cellId);
+                cell.classList.add('selected');
+            }
+        }
+
+        function mergeSelectedCells() {
+            if (selectedCells.size === 0) {
+                alert('Selecciona al menos una casilla.');
+                return;
+            }
+
+            const covered = new Set();
+            const selectedTds = [];
+            for (let id of selectedCells) {
+                const [r, c] = id.split('-').map(Number);
+                const td = table.rows[r].cells[c];
+                selectedTds.push(td);
+                const rowspan = td.rowSpan || 1;
+                const colspan = td.colSpan || 1;
+                for (let i = 0; i < rowspan; i++) {
+                    for (let j = 0; j < colspan; j++) {
+                        covered.add(`${r + i}-${c + j}`);
+                    }
+                }
+            }
+
+            if (covered.size < 2) {
+                alert('Selecciona al menos 2 casillas para unir.');
+                return;
+            }
+
+            const allRows = Array.from(covered).map(p => parseInt(p.split('-')[0]));
+            const allCols = Array.from(covered).map(p => parseInt(p.split('-')[1]));
+            const minRow = Math.min(...allRows);
+            const maxRow = Math.max(...allRows);
+            const minCol = Math.min(...allCols);
+            const maxCol = Math.max(...allCols);
+            const expected = (maxRow - minRow + 1) * (maxCol - minCol + 1);
+
+            if (covered.size !== expected) {
+                alert('La selección debe formar un rectángulo contiguo sin huecos.');
+                return;
+            }
+
+            // Unmerge all selected
+            for (let td of selectedTds) {
+                unmergeCell(td);
+            }
+
+            // Now merge the rectangle
+            const newTd = table.rows[minRow].cells[minCol];
+            newTd.rowSpan = maxRow - minRow + 1;
+            newTd.colSpan = maxCol - minCol + 1;
+            newTd.classList.add('merged');
+            newTd.innerHTML = ''; // Clear text for new merge
+
+            for (let i = minRow; i <= maxRow; i++) {
+                for (let j = minCol; j <= maxCol; j++) {
+                    if (i !== minRow || j !== minCol) {
+                        table.rows[i].cells[j].style.display = 'none';
+                    }
+                }
+            }
+
+            merges.push({ row: minRow, col: minCol, rowspan: newTd.rowSpan, colspan: newTd.colSpan, text: '' });
+
+            selectedCells.clear();
+            document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+            selectMode = false;
+            alert('Casillas unidas exitosamente.');
+        }
+
+        function unmergeCell(cell) {
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+            const rowspan = cell.rowSpan || 1;
+            const colspan = cell.colSpan || 1;
+
+            cell.rowSpan = 1;
+            cell.colSpan = 1;
+            cell.innerHTML = '';
+            cell.classList.remove('merged');
+            cell.classList.remove('selected');
+
+            for (let i = row; i < row + rowspan; i++) {
+                for (let j = col; j < col + colspan; j++) {
+                    const hiddenCell = table.rows[i].cells[j];
+                    if (hiddenCell) {
+                        hiddenCell.style.display = '';
+                        hiddenCell.classList.remove('selected');
+                    }
+                }
+            }
+
+            merges = merges.filter(m => !(m.row === row && m.col === col));
+            selectedCells.delete(`${row}-${col}`);
+            alert('Casilla sustraída/borrada.');
+        }
+
+        function saveGame() {
+            const saved = {
+                rows: parseInt(document.getElementById('rows').value),
+                cols: parseInt(document.getElementById('cols').value),
+                merges: merges
+            };
+            localStorage.setItem('gridGame', JSON.stringify(saved));
+            alert('Partida guardada.');
+        }
+
+        function loadGame() {
+            const saved = JSON.parse(localStorage.getItem('gridGame'));
+            if (saved) {
+                document.getElementById('rows').value = saved.rows;
+                document.getElementById('cols').value = saved.cols;
+                generateGrid();
+                applyMerges(saved.merges);
+                alert('Partida cargada.');
+            } else {
+                alert('No hay partida guardada.');
+            }
+        }
+
+        function applyMerges(mergesArr) {
+            merges = mergesArr;
+            for (const m of merges) {
+                const td = table.rows[m.row].cells[m.col];
+                td.rowSpan = m.rowspan;
+                td.colSpan = m.colspan;
+                td.innerHTML = m.text || '';
+                if (m.rowspan > 1 || m.colspan > 1) {
+                    td.classList.add('merged');
+                }
+                for (let i = m.row; i < m.row + m.rowspan; i++) {
+                    for (let j = m.col; j < m.col + m.colspan; j++) {
+                        if (i !== m.row || j !== m.col) {
+                            table.rows[i].cells[j].style.display = 'none';
+                        }
+                    }
+                }
+            }
+        }
+
+        function playGame() {
+            if (!table) {
+                alert('Genera la retícula primero.');
+                return;
+            }
+
+            // Merge the entire row 18 (0-indexed row 17) into one cell
+            const rowIndex = 17; // Row 18 (1-indexed)
+            const row = table.rows[rowIndex];
+            if (!row) {
+                alert('La fila 18 no existe.');
+                return;
+            }
+
+            // Unmerge any existing merges in this row
+            for (let j = 0; j < row.cells.length; j++) {
+                const cell = row.cells[j];
+                if (cell.style.display !== 'none') {
+                    unmergeCell(cell);
+                }
+            }
+
+            // Now merge the entire row
+            const firstCell = row.cells[0];
+            firstCell.colSpan = 32; // Assuming 32 columns
+            firstCell.classList.add('merged');
+            firstCell.innerHTML = 'SUNDAY';
+
+            for (let j = 1; j < 32; j++) {
+                row.cells[j].style.display = 'none';
+            }
+
+            // Add to merges if not already
+            const found = merges.find(m => m.row === rowIndex && m.col === 0);
+            if (found) {
+                found.colspan = 32;
+                found.text = 'SUNDAY';
+            } else {
+                merges.push({ row: rowIndex, col: 0, rowspan: 1, colspan: 32, text: 'SUNDAY' });
+            }
+
+            alert('Crypto puzzle resuelto. Resultado final en fila 18: SUNDAY');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>AI Rendering - Dreamars</title>
+    <style>
+        body {
+            background-color: #1C2526;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            padding: 50px 20px;
+        }
+        .button {
+            background-color: #ff4500;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .ai-section {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e03e00;
+        }
+        #result img {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+
+
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Rendering Studio</h1>
+        <p>Welcome to the AI Rendering section of Dreamars. Generate your Martian designs here!</p>
+        <a href="/" class="button">Back to Home</a>
+
+   <!-- Añadimos el formulario de IA aquí -->
+        <div class="ai-section">
+            <h3>AI Design Generator</h3>
+            
+            <input type="text" id="prompt" placeholder="e.g., Render of a Martian modular house">
+            
+
+            <input type="number" id="frontWidth" placeholder="Frontal Width (meters)" min="1">
+            <input type="number" id="totalHeight" placeholder="Total Height (meters)" min="1">
+            <input type="number" id="floorHeight" placeholder="Height per Floor (meters)" min="1">
+            <input type="number" id="windowsPerFloor" placeholder="Windows per Floor" min="0">
+            
+            
+            <button onclick="generateImage()">Generate</button>
+            <div id="result"></div>
+        </div>
+   
+
+
+<script>
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value;
+
+            const frontWidth = Math.max(1, parseInt(document.getElementById('frontWidth').value) || 10);
+            const totalHeight = Math.max(1, parseInt(document.getElementById('totalHeight').value) || 20);
+            const floorHeight = Math.max(1, parseInt(document.getElementById('floorHeight').value) || 5);
+            const windowsPerFloor = Math.max(0, parseInt(document.getElementById('windowsPerFloor').value) || 2);
+
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Generating...";
+
+            // Validación básica
+            if (totalHeight < floorHeight) {
+            resultDiv.innerHTML = "Error: Total height must be greater than floor height.";
+            return;
+            }
+            const numFloors = Math.floor(totalHeight / floorHeight);
+
+            const detailedPrompt = `${prompt}, a highly detailed Martian architectural building, frontal width exactly ${frontWidth}m, total height precisely ${totalHeight}m, ${numFloors} floors, each floor ${floorHeight}m high, featuring ${windowsPerFloor} evenly spaced rectangular windows per floor, red Martian terrain, futuristic glass materials, sharp edges, cinematic lighting, 4k quality`;
+            
+                  
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: prompt })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    resultDiv.innerHTML = `Error: ${data.error}`;
+                    return;
+                }
+                resultDiv.innerHTML = `<img src="data:image/png;base64,${data.image_base64}" alt="Generated Image" style="max-width: 100%;">`;
+            } catch (error) {
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+
+    </script>
+
+    </div>
+</body>
+</html>

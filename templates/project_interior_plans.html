@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dreamars: Dreaming on Mars</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @font-face {
+            font-family: 'VerdanaBold';
+            src: url('{{ url_for("static", filename="fonts/VerdanaBold.woff2") }}') format('woff2');
+        }
+        @font-face {
+            font-family: 'Verdana';
+            src: url('{{ url_for("static", filename="fonts/Verdana.woff2") }}') format('woff2');
+        } 
+        @font-face {
+            font-family: 'D-DIN';
+            src: url('{{ url_for("static", filename="fonts/D-DIN.woff2") }}') format('woff2');
+        } 
+        @font-face {
+            font-family: 'D-DINCo-Bold';
+            src: url('{{ url_for("static", filename="fonts/D-DINCo-Bold.woff2") }}') format('woff2');
+        } 
+        @font-face {
+            font-family: 'D-DIN-Bold';
+            src: url('{{ url_for("static", filename="fonts/D-DIN-Bold.woff2") }}') format('woff2');
+        }
+        body { 
+            font-family: 'VerdanaBold', sans-serif; 
+            margin: 0; 
+            color: #FFFFFF; 
+            overflow-x: hidden; /* Evita la barra horizontal */
+            width: 100%; /* Asegura que el cuerpo no exceda el viewport */
+            box-sizing: border-box; /* Incluye padding y bordes en el ancho */  
+        }
+
+        a { color: #FFFFFF; text-decoration: none; }
+
+        nav {
+            padding: 10px;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+        .logo { 
+            height: 50px; 
+            margin-left: 50px; 
+            margin-right: 20px; 
+            margin-top: 20px; 
+        } 
+        .nav-links {
+            margin-left: 25px;
+            margin-right: auto;
+            margin-top: 20px;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: nowrap;
+            position: relative;
+        }
+        .nav-links a {
+            color: #FFFFFF;
+            margin: 0 15px;
+            text-decoration: none;
+            padding: 5px;
+            opacity: 0.7; /* Opacidad inicial del 50% */
+            font-size: 13px;
+            font-family: 'D-DIN-Bold', sans-serif;
+            color: rgb(240, 240, 250);
+            vertical-align: middle;
+        }
+        .nav-links a:hover { 
+            color: #FFFFFF; 
+            opacity: 0.9; /* Opacidad al 80% en hover */
+        }
+        .dropdown-project {
+            position: relative;
+            display: inline-block;
+            flex-shrink: 0;
+            margin: 0 15px;
+            align-self: baseline;
+        }
+        .project-link {
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 5px;
+            opacity: 0.7;
+            font-size: 13px;
+            font-family: 'D-DIN-Bold', sans-serif;
+            color: rgb(240, 240, 250);
+            position: relative;
+        }
+
+        .dropdown-content-project {
+            display: none;
+            position: absolute;
+            background-color: #ffffff00;
+            min-width: 160px;
+            z-index: 1000;
+            top: 100%;
+            left: 0; /* Alinea con el inicio del enlace padre */
+            box-shadow: none; /* Elimina sombra si no es necesaria */
+            white-space: nowrap;
+        }
+        .dropdown-content-project a {
+            color: #FFFFFF;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            opacity: 0.7; /* Opacidad inicial del 50% */
+            font-size: 13px;
+            font-family: 'D-DIN-Bold', sans-serif;
+
+            color: rgb(240, 240, 250);
+        }
+        .dropdown-content-project a:hover {
+            background-color: rgba(255, 255, 255, 0);
+        }
+        .dropdown-project:hover .dropdown-content-project {
+            display: block;
+        }
+        .dropdown-project:hover .project-link::after {
+            color: #FFFFFF;
+        }
+        .project-link::after {
+            content: "\f078";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: transparent;
+            z-index: 2;
+
+        }
+
+        .dropdown-ai {
+            position: relative;
+            display: inline-block;
+            flex-shrink: 0;
+            margin: 0 15px;
+            align-self: baseline;
+        }
+        .ai-link {
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 5px;
+            opacity: 0.7;
+            font-size: 13px;
+            font-family: 'D-DIN-Bold', sans-serif;
+            color: rgb(240, 240, 250);
+            position: relative;
+        }
+
+        .dropdown-content-ai {
+            display: none;
+            position: absolute;
+            background-color: #ffffff00;
+            min-width: 160px;
+            z-index: 1000;
+            top: 100%;
+            left: 0;
+            box-shadow: none;
+            white-space: nowrap;
+        }
+        .dropdown-content-ai a {
+            color: #FFFFFF;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            opacity: 0.7;
+            font-size: 13px;
+            font-family: 'D-DIN-Bold', sans-serif;
+            color: rgb(240, 240, 250);
+        }
+        .dropdown-content-ai a:hover {
+            background-color: rgba(255, 255, 255, 0);
+        }
+        .dropdown-ai:hover .dropdown-content-ai {
+            display: block;
+        }
+        .dropdown-ai:hover .ai-link::after {
+            color: #FFFFFF;
+        }
+        .ai-link::after {
+            content: "\f078";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: transparent;
+            z-index: 2;
+
+        }
+
+
+        section { padding: 50px 20px; }
+        .hero { 
+            background-image: url('{{ url_for("static", filename="interior_03.jpg") }}');
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            text-align: left;
+            position: relative;
+        } 
+        .hero-content {
+            margin-top: -100px; /* Ajusta este valor para bajar el grupo (e.g., 50px, 150px) */
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura */
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5em; 
+            color: #FFFFFF; 
+            margin-bottom: 10px; 
+        } 
+        .hero h2 { 
+            font-size: 70px;
+            color: #FFFFFF;
+            margin: 10px 0;            
+            position: relative;
+            font-family: 'D-DIN-Bold', sans-serif;            
+            color: rgb(240, 240, 250); 
+            z-index: 2;
+        }
+        .hero p { 
+            font-size: 17px; /* Tamaño reducido para Welcome */
+            color: #FFFFFF; 
+            margin-bottom: 1px; /* Espacio antes de h2 */            
+            margin-top: 7px;
+            position: relative;
+            z-index: 2;            
+            font-family: 'D-DIN', sans-serif; 
+            color: rgb(240, 240, 250);
+        }
+        .hero .gradient-overlay-right-hero {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ajusta esta altura según lo que desees cubrir */
+            background: linear-gradient(to right, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 66.67%); /* Degradado de oscuro a transparente */
+            z-index: 1; /* Debajo de la navegación */
+        }
+        .hero::before { /* Capa oscura sobre la imagen */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.40); /* Negro con 50% opacidad */
+            z-index: 1; /* Debajo del contenido pero encima de la imagen */
+        }  
+        .gradient-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to top, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 100%);
+            z-index: 1; /* Debajo del contenido pero encima de la capa oscura */
+        }   
+
+        
+        .interior { 
+            background-size: cover; 
+            height: 20vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            position: relative;
+            background: rgb(0, 0, 0); 
+        }
+        .interior-content {
+            position: relative; /* Para mover el bloque completo */
+            width: 100%; /* Ocupa todo el ancho disponible */
+            padding: 0 40px; /* Espacio interno */
+            box-sizing: border-box; /* Incluye padding en el ancho */
+            z-index: 2; /* Encima de la capa oscura */
+        }        
+        .interior h2 { 
+            font-size: 46px; /* Igual que .hero h2 */
+            color: #FFFFFF; 
+            margin: 10px 0; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN-Bold', sans-serif;            
+            color: rgb(240, 240, 250); 
+        }
+        .interior p { 
+            font-size: 26px; /* Igual que .hero p */
+            color: #FFFFFF; 
+            margin-bottom: 1px; /* Espacio antes de h2 */
+            margin-top: 7px; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN', sans-serif; 
+            
+            color: rgb(240, 240, 250); 
+        }
+
+        
+        .fi {
+            height: 100vh;
+            position: relative;
+            padding: 0;
+        }
+        .fi-content {
+            position: relative; /* Para mover el bloque completo */
+            margin-top: 50px; /* Espacio desde la parte superior */
+            margin-left: 50px;
+            width: 100%; /* Ocupa todo el ancho disponible */
+            padding: 0 40px; /* Espacio interno */
+            box-sizing: border-box; /* Incluye padding en el ancho */
+            z-index: 2; /* Encima de la capa oscura */
+            text-align: left;
+            align-items: flex-start;   
+        } 
+        .fi h2 { 
+            font-size: 46px; /* Igual que .hero h2 */
+            color: #FFFFFF; 
+            margin: 10px 0; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN-Bold', sans-serif; 
+            color: rgb(240, 240, 250); 
+        }
+        .fi p { 
+            font-size: 17px; /* Igual que .hero p */
+            color: #FFFFFF; 
+            margin-bottom: 1px; /* Espacio antes de h2 */
+            margin-top: 7px; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN', sans-serif; 
+            color: rgb(240, 240, 250); 
+        }
+
+
+
+        .carousel-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .slides {
+            display: flex;
+            width: 300%;
+            height: 100%;
+            transition: transform 0.5s ease;
+        }       
+        .slides .gradient-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to bottom, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 100%);
+            z-index: 1; /* Debajo del contenido pero encima de la capa oscura */
+        }   
+
+         .slides::before { /* Capa oscura sobre la imagen */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.20); /* Negro con 50% opacidad, ajustable */
+            z-index: 2; /* Debajo del contenido pero encima de la imagen */
+        }
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+        
+        .slide1 {
+            background-image: url('{{ url_for("static", filename="interior_05.jpg") }}');
+        }
+        .slide2 {
+            background-image: url('{{ url_for("static", filename="interior_06.jpg") }}');
+        }
+        .slide3 {
+            background-image: url('{{ url_for("static", filename="interior_07.jpg") }}');
+        }
+        .slide-content {
+            position: absolute;
+            margin-left: 50px;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            color: white;
+        }
+        .slide h2 {
+            font-size: 46px;
+            font-family: 'D-DIN-Bold', sans-serif;
+            color: rgb(240, 240, 250);
+            margin: 10px 0;
+        }
+        .carousel-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 4;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .nav-dot.active {
+            background: white;
+        }
+        
+
+        .designprocess { 
+            background-image: url('{{ url_for("static", filename="interior_04.jpg") }}');
+            background-size: cover; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: flex-start; 
+            text-align: center; 
+            position: relative;
+        }
+        .designprocess-content {
+            position: relative; /* Para mover el bloque completo */
+            margin-top: 150px; /* Espacio desde la parte superior */
+            margin-left: 50px;
+            width: 100%; /* Ocupa todo el ancho disponible */
+            padding: 0 40px; /* Espacio interno */
+            box-sizing: border-box; /* Incluye padding en el ancho */
+            z-index: 2; /* Encima de la capa oscura */
+            text-align: left;
+            align-items: flex-start;
+        }        
+        .designprocess h2 { 
+            font-size: 46px; /* Igual que .hero h2 */
+            color: #FFFFFF; 
+            margin: 10px 0; 
+            
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN-Bold', sans-serif; 
+            
+            color: rgb(240, 240, 250); 
+        }
+        .designprocess p { 
+            font-size: 17px; /* Igual que .hero p */
+            color: #FFFFFF; 
+            margin-bottom: 1px; /* Espacio antes de h2 */
+            
+            margin-top: 7px; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN', sans-serif; 
+            
+            color: rgb(240, 240, 250); 
+        }
+        .designprocess .gradient-overlay-designprocess {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ajusta esta altura según lo que desees cubrir */
+            background: linear-gradient(to bottom, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 66.67%); /* Degradado de oscuro a transparente */
+            z-index: 1; /* Debajo de la navegación */
+        }
+        .designprocess .gradient-overlay-right-designprocess {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ajusta esta altura según lo que desees cubrir */
+            background: linear-gradient(to right, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 66.67%); /* Degradado de oscuro a transparente */
+            z-index: 1; /* Debajo de la navegación */
+        }
+        .designprocess::before { /* Capa oscura sobre la imagen */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.30); /* Negro con 50% opacidad, ajustable */
+            z-index: 1; /* Debajo del contenido pero encima de la imagen */
+        }
+
+        .cta { 
+            background-size: cover; 
+            height: 35vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: flex-start; 
+            text-align: center; 
+            position: relative;
+            background: rgb(0, 0, 0); 
+        }
+        .cta-content {
+            position: absolute; /* Para mover el bloque completo */
+            bottom: 0;
+            left: 0;
+            margin-bottom: 80px; /* Espacio desde la parte superior */
+            width: 100%; /* Ocupa todo el ancho disponible */
+            padding: 0 40px; /* Espacio interno */
+            box-sizing: border-box; /* Incluye padding en el ancho */
+            z-index: 2; /* Encima de la capa oscura */
+            text-align: center;
+            align-items: center;
+        }        
+        .cta h2 { 
+            font-size: 46px; /* Igual que .hero h2 */
+            color: #FFFFFF; 
+            margin: 10px 0; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN-Bold', sans-serif; 
+            
+            color: rgb(240, 240, 250); 
+        }
+        .cta p { 
+            font-size: 14px; /* Igual que .hero p */
+            margin-bottom: 1px; /* Espacio antes de h2 */
+            margin-top: 7px; 
+            position: relative; /* Para z-index */
+            z-index: 2; /* Encima de la capa oscura si la hay */
+            font-family: 'D-DIN', sans-serif; 
+            color: rgb(240, 240, 250, .5);
+        }
+        .cta-line {
+        position: absolute;
+        top: 75px;
+        bottom: 140px;
+        left: 50%;
+        width: 2px; /* Grosor de la línea */
+        background-color: #FFFFFF; /* Color de la línea (ajusta según tu diseño) */
+        transform: translateX(-50%); /* Centra la línea exactamente */
+        z-index: 10; /* Asegura que esté por encima de otros elementos */
+        }
+
+
+     
+          
+      
+       
+
+
+
+        .footer { 
+            background-color: #000000; 
+            padding: 10px; 
+            text-align: center; 
+            position: relative;
+        }
+        .footer-content {
+            display: flex;
+            align-items: center; /* Alinea verticalmente el botón y el <p> */
+            justify-content: flex-start; 
+            margin-left: 50px;/* Centra el contenido horizontalmente */
+            margin-bottom: 5px;
+            gap: 500px /* Espacio entre el botón y el texto */
+        }
+        .footer-content p {
+            margin: 0; /* Elimina márgenes por defecto del <p> */
+            font-size: 16px; /* Ajusta según tu diseño */
+            
+        }
+        .footer-content p a { 
+            color: #FFFFFF; 
+            margin: 0 15px; 
+            text-decoration: none; 
+            padding: 5px; 
+            font-size: 12px;
+            font-family: 'D-DIN', sans-serif; 
+            margin-left: 40px; 
+            color: rgb(255, 255, 255); 
+        }
+        .footer-content-logo {
+            margin-right: 0;
+        }
+        .x-button {
+            width: 48px; /* Tamaño del botón */
+            height: 50.4px; /* Igual al ancho para hacerlo circular */
+            border-radius: 50%; /* Hace el botón circular */
+            border: none; /* Elimina bordes por defecto */
+            background-color: #1C2526; /* Color de fondo, ajusta según tu diseño */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 0; /* Elimina padding interno */
+            overflow: hidden; /* Asegura que la imagen no desborde el círculo */
+            z-index: 2; /* Encima de otros elementos */
+            /* Convertimos el botón en un enlace estilizado */
+            text-decoration: none; /* Elimina el subrayado de enlace */
+            display: inline-flex; /* Mantiene el comportamiento flex */
+        }       
+        .x-logo {
+            width: 12px; /* Dimensiones del logo dentro del botón */
+            height: 14.4px;
+            object-fit: contain; /* Mantiene la proporción de la imagen */
+        }
+
+        .footer .gradient-overlay-footer {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            width: 100%;
+            height: 350px; /* Ajusta esta altura según lo que desees cubrir */
+            background: linear-gradient(to top, rgb(0, 0, 0) 0%, rgba(255, 255, 255, 0) 25%); /* Degradado de oscuro a transparente */
+            z-index: 1; /* Debajo de la navegación */
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Navegación -->
+    <nav>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Dreamars Logo" class="logo">
+        <div class="nav-links">
+            <a href="/">HOME</a>  
+            <div class="dropdown-project">
+                <a href="/project" class="project-link">PROJECT</a>
+                <div class="dropdown-content-project">
+                    <a href="/project_original_designs">ORIGINAL DESIGNS</a>
+                    <a href="/project_physical_projects">PHYSICAL PROJECTS</a>
+                    <a href="/project_interior_plans">INTERIOR PLANS</a>
+                </div>
+            </div>
+            <a href="/contact">CONTACT</a>
+            <div class="dropdown-ai">
+                <a href="/" class="ai-link">AI DESIGN STUDIO</a>
+                <div class="dropdown-content-ai">
+                    <a href="/ai_rendering">AI RENDERING</a>
+                    <a href="/ai_interior_modeling">AI INTERIOR MODELING</a>
+                    <a href="/ai_solutions">AI STRUCTURAL SOLUTIONS</a>
+                </div>
+            </div>
+        </div>
+    
+    </nav>
+
+    <!-- Hero Section -->
+       <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>INTERIOR PLANS</h2> 
+            <p>WHERE YOUR VISION FINDS A HOME</p> 
+        </div>
+        <div class="gradient-bottom"></div>
+
+    </section>
+
+    <!-- Interior Plans -->
+    <section class="interior">
+        <div class="gradient-overlay-interior"></div>
+        <div class="gradient-overlay-right-interior"></div>       
+        <div class="interior-content">            
+            <P>We craft spaces that feel alive.</P>
+            <P>Every room, every detail, designed to reflect you.</P>
+        </div>
+    </section>
+
+    
+   <!-- Featured Interiors -->
+<section class="fi">
+    <div class="carousel-container">
+        <div class="slides" id="slides">
+            <div class="slide slide1">
+                <div class="gradient-top"></div>
+                <div class="slide-content">
+                    <h2>CITY SANCTUARY</h2>
+                    <p>Sleek, modern, warm.</p>
+                    <P>A retreat from the urban rush.</P>
+                </div>
+            </div>
+            <div class="slide slide2">
+                <div class="gradient-top"></div>
+                <div class="slide-content">
+                    <h2>ETERNAL CALM</h2>
+                    <p>Timeless designs that</p>
+                    <p>soothe the soul and spark inspiration.</p>
+                </div>
+            </div>
+            <div class="slide slide3">
+                <div class="gradient-top"></div>
+                <div class="slide-content">
+                    <h2>VIVID DREAM</h2>
+                    <p>Bright, fearless spaces</p>
+                    <p>that scream you.</p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-nav">
+            <div class="nav-dot active" data-slide="0"></div>
+            <div class="nav-dot" data-slide="1"></div>
+            <div class="nav-dot" data-slide="2"></div>
+        </div>        
+    </section>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.getElementById('slides');
+    const dots = document.querySelectorAll('.nav-dot');
+
+    function showSlide(index) {
+        slides.style.transform = `translateX(-${index * (100 / 3)}%)`;
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[index].classList.add('active');
+        currentSlide = index;
+    }
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => showSlide(index));
+    });
+
+    // Auto slide every 5 seconds
+    setInterval(() => {
+        currentSlide = (currentSlide + 1) % 3;
+        showSlide(currentSlide);
+    }, 5000);
+</script>
+      
+
+
+     <!-- Design Process -->
+    <section class="designprocess">
+        <div class="gradient-overlay-designprocess"></div>
+        <div class="gradient-overlay-right-designprocess"></div>              
+        <div class="designprocess-content">            
+            <h2>OUR DESIGN PROCESS</h2>
+            <p>Your story starts here.</p> 
+            <p>We listen, sketch, and render until your space feels like home.</p>   
+            <p>With precision and passion, we create interiors that live with you.</p>
+        </div>
+    </section>
+
+    
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="cta-line"></div>
+        <div class="cta-content"> 
+            <p>Ready to design your world? Let's talk.</p>
+        </div>  
+    </section>
+
+
+
+    <footer class="footer">
+        <div class="gradient-overlay-footer"></div>
+        <div class="footer-content">
+            <div class="footer-content-logo">
+            <button class="x-button">
+                <img src="{{ url_for('static', filename='logo_x.svg') }}" 
+                alt="X Logo" 
+                class="x-logo">
+                
+            </button>
+            </div>
+    <p>
+        <a href="/">HOME</a>
+        <a href="/project">PROJECT</a>
+        <a href="/contact">CONTACT</a>
+    </p>
+        </div>
+    </footer>
+
+
+
+
+</body>
+</html>

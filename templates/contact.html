@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Contact - Dreamars</title>
+    <style>
+        body { font-family: Arial; text-align: center; background-color: #1C2526; color: #D9E4E6; }
+        nav { margin: 10px; border-bottom: 2px solid #D9E4E6; display: flex; align-items: center; }
+        .logo { height: 50px; margin-right: 10px; }
+        .nav-links { margin-left: auto; }
+        a { color: #FFFFFF; margin: 0 10px; text-decoration: none; padding: 5px; }
+        a:hover { color: #6B1212; background-color: #D9E4E6; border-radius: 3px; }
+        form { margin: 20px; }
+        label { margin: 5px; }
+        input { margin: 5px; padding: 5px; background-color: #D9E4E6; border: none; }
+        button { padding: 5px 10px; background-color: #0A3D62; color: #D9E4E6; border: none; }
+        button:hover { background-color: #6B1212; }
+    </style>
+</head>
+<body>
+    <nav>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Dreamars Logo" class="logo">
+        <div class="nav-links">
+            <a href="/">Home</a> | <a href="/project">Project</a> | <a href="/contact">Contact</a>
+        </div>
+    </nav>
+    <h1>Contact</h1>
+    <p>Contact us for your next project.</p>
+    <form>
+        <label>Name:</label><input type="text" name="name"><br>
+        <label>Email:</label><input type="email" name="email"><br>
+        <button type="submit">Send</button>
+    </form>
+    <p>Email: info@dreamars.com</p>
+</body>
+</html>
